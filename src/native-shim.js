@@ -139,7 +139,7 @@
         }
         userConstruction = false;
     }
-    const StandInElement = nativeClass(NativeHTMLElement, setup)
+    const StandInElement = nativeClass(NativeHTMLElement, setup);
     const standInProto = StandInElement.prototype;
     StandInElement.observedAttributes = elementClass.observedAttributes;
     standInProto.connectedCallback = elementProto.connectedCallback;
