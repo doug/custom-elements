@@ -95,6 +95,13 @@
    */
   let userConstruction = false;
 
+  const nativeClass = new Function('PARENT', 'SETUP', `return class extends PARENT {
+    constructor() {
+      super();
+      SETUP.call(this);
+    }
+  }`);
+
   window.HTMLElement = function() {
     if (!browserConstruction) {
       const tagname = tagnameByConstructor.get(this.constructor);
@@ -118,12 +125,7 @@
 
   window.customElements.define = (tagname, elementClass) => {
     const elementProto = elementClass.prototype;
-    const StandInElement = class extends NativeHTMLElement {
-      constructor() {
-        // Call the native HTMLElement constructor, this gives us the
-        // under-construction instance as `this`:
-        super();
-
+    function setup() {
         // The prototype will be wrong up because the browser used our fake
         // class, so fix it:
         Object.setPrototypeOf(this, elementProto);
@@ -136,8 +138,8 @@
           elementClass.call(this);
         }
         userConstruction = false;
-      }
-    };
+    }
+    const StandInElement = nativeClass(NativeHTMLElement, setup)
     const standInProto = StandInElement.prototype;
     StandInElement.observedAttributes = elementClass.observedAttributes;
     standInProto.connectedCallback = elementProto.connectedCallback;
